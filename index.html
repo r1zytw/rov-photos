@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Загрузка фото — Разговоры о важном</title>
-  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -23,7 +22,7 @@
     }
 
     header {
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      background: linear-gradient(135deg, #1e40af, #2563eb);
       color: #ffffff;
       padding: 16px 20px;
       text-align: center;
@@ -43,14 +42,15 @@
 
     .status-bar {
       background: #ffffff;
-      padding: 10px 16px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: 13.5px;
       font-weight: 600;
       border-bottom: 1px solid #e2e8f0;
+      transition: all 0.2s;
     }
 
     .status-dot {
@@ -59,14 +59,24 @@
       border-radius: 50%;
       background: #f59e0b;
       display: inline-block;
+      flex-shrink: 0;
+      animation: pulse 1.5s infinite;
     }
 
     .status-dot.connected {
       background: #10b981;
+      animation: none;
     }
 
     .status-dot.error {
       background: #ef4444;
+      animation: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
     }
 
     main {
@@ -75,6 +85,20 @@
       max-width: 480px;
       margin: 0 auto;
       width: 100%;
+    }
+
+    .instructions {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #0369a1;
+      line-height: 1.4;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
     }
 
     .card {
@@ -100,25 +124,26 @@
     }
 
     .card-icon {
-      font-size: 24px;
-      width: 40px;
-      height: 40px;
+      font-size: 22px;
+      width: 38px;
+      height: 38px;
       background: #f8fafc;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 1px solid #e2e8f0;
     }
 
     .card-title {
-      font-size: 15px;
+      font-size: 14.5px;
       font-weight: 700;
       color: #1e293b;
-      line-height: 1.2;
+      line-height: 1.25;
     }
 
     .card-sub {
-      font-size: 11px;
+      font-size: 11.5px;
       color: #64748b;
       margin-top: 2px;
     }
@@ -126,11 +151,12 @@
     .upload-zone {
       border: 2px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 18px 12px;
+      padding: 20px 12px;
       text-align: center;
       cursor: pointer;
       background: #f8fafc;
       position: relative;
+      transition: background 0.15s;
     }
 
     .upload-zone:active {
@@ -157,43 +183,56 @@
       gap: 6px;
     }
 
+    .upload-label span:last-child {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 400;
+    }
+
     .preview-box {
       display: none;
       align-items: center;
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 6px;
+      padding: 6px;
     }
 
     .preview-img {
-      width: 60px;
-      height: 60px;
+      width: 64px;
+      height: 64px;
       object-fit: cover;
       border-radius: 8px;
       border: 1px solid #cbd5e1;
+      background: #e2e8f0;
     }
 
     .preview-info {
       flex: 1;
       font-size: 13px;
+      min-width: 0;
     }
 
     .preview-name {
       font-weight: 600;
       color: #0f172a;
-      word-break: break-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .preview-size {
-      color: #64748b;
-      font-size: 11px;
+      color: #15803d;
+      font-size: 11.5px;
+      font-weight: 500;
+      margin-top: 2px;
     }
 
     .btn-remove {
       background: #fee2e2;
       color: #b91c1c;
       border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
+      border-radius: 8px;
+      padding: 8px 12px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
@@ -241,6 +280,11 @@
       display: none;
       text-align: center;
       padding: 40px 20px;
+      background: #ffffff;
+      border-radius: 16px;
+      margin: 20px auto;
+      max-width: 480px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     }
 
     .success-icon {
@@ -249,16 +293,26 @@
     }
 
     .success-title {
-      font-size: 20px;
+      font-size: 21px;
       font-weight: 700;
       color: #15803d;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .success-text {
-      font-size: 14px;
+      font-size: 14.5px;
       color: #475569;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    .success-highlight {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 16px;
+      font-weight: 600;
+      color: #166534;
     }
   </style>
 </head>
@@ -274,26 +328,32 @@
   </div>
 
   <main id="main-content">
+    <div class="instructions">
+      <span>ℹ️</span>
+      <span>Сделайте или выберите из галереи 2 фотографии. Они сразу будут переданы на компьютер в Яндекс.Форму.</span>
+    </div>
+
     <!-- Слот 1: Видеоролик -->
     <div id="card-video" class="card">
       <div class="card-header">
         <div class="card-icon">🎬</div>
         <div>
-          <div class="card-title">1. Фотография просмотра видеоролика</div>
-          <div class="card-sub">Обязательное фото (до 20 МБ)</div>
+          <div class="card-title">1. Просмотр видеоролика</div>
+          <div class="card-sub">Фото класса во время просмотра</div>
         </div>
       </div>
       <div class="upload-zone" id="zone-video">
         <input type="file" id="input-video" class="file-input" accept="image/*">
         <div class="upload-label">
-          <span>📷 Сделать фото или выбрать из галереи</span>
+          <span>📷 Сделать фото / Выбрать из галереи</span>
+          <span>Нажмите сюда для выбора</span>
         </div>
       </div>
       <div class="preview-box" id="preview-video">
-        <img id="img-video" class="preview-img" alt="Превью">
+        <img id="img-video" class="preview-img" alt="Превью видео">
         <div class="preview-info">
           <div id="name-video" class="preview-name">video.jpg</div>
-          <div id="size-video" class="preview-size">1.2 MB</div>
+          <div id="size-video" class="preview-size">0.0 MB</div>
         </div>
         <button type="button" class="btn-remove" id="remove-video">Удалить</button>
       </div>
@@ -304,21 +364,22 @@
       <div class="card-header">
         <div class="card-icon">📋</div>
         <div>
-          <div class="card-title">2. Фотография оформления доски</div>
-          <div class="card-sub">Обязательное фото (до 20 МБ)</div>
+          <div class="card-title">2. Оформление доски</div>
+          <div class="card-sub">Фото школьной доски с темой занятия</div>
         </div>
       </div>
       <div class="upload-zone" id="zone-board">
         <input type="file" id="input-board" class="file-input" accept="image/*">
         <div class="upload-label">
-          <span>📷 Сделать фото или выбрать из галереи</span>
+          <span>📷 Сделать фото / Выбрать из галереи</span>
+          <span>Нажмите сюда для выбора</span>
         </div>
       </div>
       <div class="preview-box" id="preview-board">
-        <img id="img-board" class="preview-img" alt="Превью">
+        <img id="img-board" class="preview-img" alt="Превью доски">
         <div class="preview-info">
           <div id="name-board" class="preview-name">board.jpg</div>
-          <div id="size-board" class="preview-size">1.5 MB</div>
+          <div id="size-board" class="preview-size">0.0 MB</div>
         </div>
         <button type="button" class="btn-remove" id="remove-board">Удалить</button>
       </div>
@@ -335,8 +396,10 @@
     <div class="success-icon">🎉</div>
     <div class="success-title">Фотографии переданы!</div>
     <div class="success-text">
-      Они автоматически прикреплены к Яндекс.Форме на вашем компьютере.<br/><br/>
-      Теперь вернитесь за компьютер и нажмите кнопку <strong>«Отправить»</strong> внизу формы!
+      Они автоматически прикреплены к полям Яндекс.Формы на вашем компьютере.
+    </div>
+    <div class="success-highlight">
+      👉 Вернитесь за компьютер и нажмите синюю кнопку <strong>«Отправить»</strong> внизу формы!
     </div>
   </div>
 
@@ -371,69 +434,42 @@
 
       let videoFile = null;
       let boardFile = null;
-      let peer = null;
-      let conn = null;
+      let isConnected = false;
 
       if (!targetSessionId) {
         statusDot.className = 'status-dot error';
-        statusText.textContent = 'Ошибка: не указан session ID в QR-коде';
+        statusText.textContent = '❌ Не указан ID сессии. Отсканируйте QR-код заново.';
         return;
       }
 
-      // Инициализация WebRTC PeerJS
-      initPeerConnection();
+      // Мгновенное подключение к компьютеру через защищенный HTTPS-канал
+      sendPhonePing();
 
-      function initPeerConnection() {
-        statusDot.className = 'status-dot';
-        statusText.textContent = 'Подключение к компьютеру...';
-
+      async function sendPhonePing() {
         try {
-          peer = new Peer({
-            debug: 1,
-            config: {
-              iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun.cloudflare.com:3478' }
-              ]
+          const res = await fetch(`https://ntfy.sh/${targetSessionId}`, {
+            method: 'POST',
+            body: 'PHONE_PING',
+            headers: {
+              'Title': 'PHONE_PING',
+              'Priority': 'default'
             }
           });
 
-          peer.on('open', (myId) => {
-            console.log('Mobile peer opened:', myId);
-            connectToHost();
-          });
-
-          peer.on('error', (err) => {
-            console.error('Peer error:', err);
-            statusDot.className = 'status-dot error';
-            statusText.textContent = 'Ошибка соединения. Повтор через 3 сек...';
-            setTimeout(initPeerConnection, 3000);
-          });
+          if (res.ok) {
+            isConnected = true;
+            statusDot.className = 'status-dot connected';
+            statusText.textContent = '🟢 Подключено к вашему компьютеру!';
+            checkCanSubmit();
+          } else {
+            throw new Error('HTTP ' + res.status);
+          }
         } catch (e) {
-          console.error('PeerJS init failed:', e);
-        }
-      }
-
-      function connectToHost() {
-        conn = peer.connect(targetSessionId, { reliable: true });
-
-        conn.on('open', () => {
-          console.log('Connected to PC host:', targetSessionId);
-          statusDot.className = 'status-dot connected';
-          statusText.textContent = '🟢 Подключено к вашему компьютеру!';
-          checkCanSubmit();
-        });
-
-        conn.on('close', () => {
+          console.warn('Ping error, retrying in 2.5s...', e);
           statusDot.className = 'status-dot';
-          statusText.textContent = 'Соединение закрыто. Переподключение...';
-          setTimeout(connectToHost, 2000);
-        });
-
-        conn.on('error', (err) => {
-          console.error('Connection error:', err);
-        });
+          statusText.textContent = 'Подключение к компьютеру...';
+          setTimeout(sendPhonePing, 2500);
+        }
       }
 
       // Обработка выбора файлов
@@ -473,7 +509,7 @@
 
       function showPreview(file, imgEl, nameEl, sizeEl, previewBox, zoneBox, cardBox) {
         nameEl.textContent = file.name;
-        sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' МБ';
         const reader = new FileReader();
         reader.onload = (e) => {
           imgEl.src = e.target.result;
@@ -490,16 +526,15 @@
         btnSubmit.disabled = !hasAny;
       }
 
-      // Сжатие изображения для быстрой и надежной передачи по WebRTC
-      async function readFileAsOptimizedDataUrl(file) {
+      // Оптимизация изображения перед отправкой (макс 1600px, отличное качество при весе ~300 КБ)
+      async function compressImageToBlob(file) {
         if (!file) return null;
         return new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-              // Если фото огромное (например, 4000x3000 с камеры), масштабируем до 2048px макс
-              const maxDim = 2048;
+              const maxDim = 1600;
               let width = img.width;
               let height = img.height;
 
@@ -518,47 +553,67 @@
               canvas.height = height;
               const ctx = canvas.getContext('2d');
               ctx.drawImage(img, 0, 0, width, height);
-              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
-              resolve(compressedDataUrl);
+
+              canvas.toBlob((blob) => {
+                resolve(blob || file);
+              }, 'image/jpeg', 0.85);
             };
+            img.onerror = () => resolve(file);
             img.src = e.target.result;
           };
+          reader.onerror = () => resolve(file);
           reader.readAsDataURL(file);
         });
       }
 
-      // Отправка фотографий на компьютер
+      // Отправка фотографий на компьютер через надежный HTTPS
       btnSubmit.addEventListener('click', async () => {
-        if (!conn || !conn.open) {
-          alert('Нет подключения к компьютеру. Пожалуйста, подождите или обновите страницу.');
-          return;
-        }
-
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<span>⏳ Отправка фотографий...</span>';
+        btnSubmit.innerHTML = '<span>⏳ Оптимизация и отправка...</span>';
 
         try {
-          const videoData = await readFileAsOptimizedDataUrl(videoFile);
-          const boardData = await readFileAsOptimizedDataUrl(boardFile);
+          // 1. Отправляем фото видеоролика
+          if (videoFile) {
+            btnSubmit.innerHTML = '<span>⏳ Передача фото 1 (видео)...</span>';
+            const videoBlob = await compressImageToBlob(videoFile);
+            const res1 = await fetch(`https://ntfy.sh/${targetSessionId}`, {
+              method: 'PUT',
+              headers: {
+                'Title': 'VIDEO_PHOTO',
+                'Filename': videoFile.name || 'video_photo.jpg',
+                'Priority': 'urgent'
+              },
+              body: videoBlob
+            });
+            if (!res1.ok) throw new Error('Ошибка отправки фото 1 (HTTP ' + res1.status + ')');
+          }
 
-          const payload = {
-            type: 'PHOTOS',
-            videoPhoto: videoData,
-            videoName: videoFile ? videoFile.name : 'video.jpg',
-            boardPhoto: boardData,
-            boardName: boardFile ? boardFile.name : 'board.jpg'
-          };
+          // 2. Отправляем фото доски
+          if (boardFile) {
+            btnSubmit.innerHTML = '<span>⏳ Передача фото 2 (доска)...</span>';
+            const boardBlob = await compressImageToBlob(boardFile);
+            const res2 = await fetch(`https://ntfy.sh/${targetSessionId}`, {
+              method: 'PUT',
+              headers: {
+                'Title': 'BOARD_PHOTO',
+                'Filename': boardFile.name || 'board_photo.jpg',
+                'Priority': 'urgent'
+              },
+              body: boardBlob
+            });
+            if (!res2.ok) throw new Error('Ошибка отправки фото 2 (HTTP ' + res2.status + ')');
+          }
 
-          conn.send(payload);
-          console.log('Photos sent successfully via WebRTC!');
-
-          // Показываем экран успеха
+          // Показываем экран успешной отправки
           mainContent.style.display = 'none';
           submitBar.style.display = 'none';
+          statusDot.className = 'status-dot connected';
+          statusText.textContent = '✅ Фотографии успешно доставлены!';
           successScreen.style.display = 'block';
+
         } catch (err) {
           console.error('Failed to send photos:', err);
-          alert('Ошибка при отправке: ' + err.message);
+          alert('Ошибка при передаче фото: ' + err.message + '\nПожалуйста, попробуйте еще раз.');
           btnSubmit.disabled = false;
           btnSubmit.innerHTML = '<span>📤 Отправить на компьютер</span>';
         }
