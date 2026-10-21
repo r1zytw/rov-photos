@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Загрузка фото — Разговоры о важном</title>
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: #ffffff;
+      padding: 16px 20px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    }
+
+    header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .status-bar {
+      background: #ffffff;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f59e0b;
+      display: inline-block;
+    }
+
+    .status-dot.connected {
+      background: #10b981;
+    }
+
+    .status-dot.error {
+      background: #ef4444;
+    }
+
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.2s;
+    }
+
+    .card.has-file {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-icon {
+      font-size: 24px;
+      width: 40px;
+      height: 40px;
+      background: #f8fafc;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    .card-sub {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .upload-zone {
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 18px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: #f8fafc;
+      position: relative;
+    }
+
+    .upload-zone:active {
+      background: #f1f5f9;
+    }
+
+    .file-input {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2563eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .preview-box {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .preview-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .preview-info {
+      flex: 1;
+      font-size: 13px;
+    }
+
+    .preview-name {
+      font-weight: 600;
+      color: #0f172a;
+      word-break: break-all;
+    }
+
+    .preview-size {
+      color: #64748b;
+      font-size: 11px;
+    }
+
+    .btn-remove {
+      background: #fee2e2;
+      color: #b91c1c;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .submit-bar {
+      padding: 16px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      position: sticky;
+      bottom: 0;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-submit:disabled {
+      background: #cbd5e1;
+      box-shadow: none;
+      cursor: not-allowed;
+      color: #64748b;
+    }
+
+    .btn-submit:not(:disabled):active {
+      transform: scale(0.98);
+    }
+
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .success-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #15803d;
+      margin-bottom: 8px;
+    }
+
+    .success-text {
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🇷🇺 Разговоры о важном</h1>
+    <p>Быстрая загрузка фотографий к отчёту</p>
+  </header>
+
+  <div class="status-bar">
+    <span id="status-dot" class="status-dot"></span>
+    <span id="status-text">Подключение к компьютеру...</span>
+  </div>
+
+  <main id="main-content">
+    <!-- Слот 1: Видеоролик -->
+    <div id="card-video" class="card">
+      <div class="card-header">
+        <div class="card-icon">🎬</div>
+        <div>
+          <div class="card-title">1. Фотография просмотра видеоролика</div>
+          <div class="card-sub">Обязательное фото (до 20 МБ)</div>
+        </div>
+      </div>
+      <div class="upload-zone" id="zone-video">
+        <input type="file" id="input-video" class="file-input" accept="image/*">
+        <div class="upload-label">
+          <span>📷 Сделать фото или выбрать из галереи</span>
+        </div>
+      </div>
+      <div class="preview-box" id="preview-video">
+        <img id="img-video" class="preview-img" alt="Превью">
+        <div class="preview-info">
+          <div id="name-video" class="preview-name">video.jpg</div>
+          <div id="size-video" class="preview-size">1.2 MB</div>
+        </div>
+        <button type="button" class="btn-remove" id="remove-video">Удалить</button>
+      </div>
+    </div>
+
+    <!-- Слот 2: Оформление доски -->
+    <div id="card-board" class="card">
+      <div class="card-header">
+        <div class="card-icon">📋</div>
+        <div>
+          <div class="card-title">2. Фотография оформления доски</div>
+          <div class="card-sub">Обязательное фото (до 20 МБ)</div>
+        </div>
+      </div>
+      <div class="upload-zone" id="zone-board">
+        <input type="file" id="input-board" class="file-input" accept="image/*">
+        <div class="upload-label">
+          <span>📷 Сделать фото или выбрать из галереи</span>
+        </div>
+      </div>
+      <div class="preview-box" id="preview-board">
+        <img id="img-board" class="preview-img" alt="Превью">
+        <div class="preview-info">
+          <div id="name-board" class="preview-name">board.jpg</div>
+          <div id="size-board" class="preview-size">1.5 MB</div>
+        </div>
+        <button type="button" class="btn-remove" id="remove-board">Удалить</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="submit-bar" id="submit-bar">
+    <button type="button" id="btn-submit" class="btn-submit" disabled>
+      <span>📤 Отправить на компьютер</span>
+    </button>
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Фотографии переданы!</div>
+    <div class="success-text">
+      Они автоматически прикреплены к Яндекс.Форме на вашем компьютере.<br/><br/>
+      Теперь вернитесь за компьютер и нажмите кнопку <strong>«Отправить»</strong> внизу формы!
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetSessionId = urlParams.get('session');
+
+      const statusDot = document.getElementById('status-dot');
+      const statusText = document.getElementById('status-text');
+      const btnSubmit = document.getElementById('btn-submit');
+      const mainContent = document.getElementById('main-content');
+      const submitBar = document.getElementById('submit-bar');
+      const successScreen = document.getElementById('success-screen');
+
+      const inputVideo = document.getElementById('input-video');
+      const inputBoard = document.getElementById('input-board');
+      const zoneVideo = document.getElementById('zone-video');
+      const zoneBoard = document.getElementById('zone-board');
+      const previewVideo = document.getElementById('preview-video');
+      const previewBoard = document.getElementById('preview-board');
+      const imgVideo = document.getElementById('img-video');
+      const imgBoard = document.getElementById('img-board');
+      const nameVideo = document.getElementById('name-video');
+      const nameBoard = document.getElementById('name-board');
+      const sizeVideo = document.getElementById('size-video');
+      const sizeBoard = document.getElementById('size-board');
+      const removeVideo = document.getElementById('remove-video');
+      const removeBoard = document.getElementById('remove-board');
+      const cardVideo = document.getElementById('card-video');
+      const cardBoard = document.getElementById('card-board');
+
+      let videoFile = null;
+      let boardFile = null;
+      let peer = null;
+      let conn = null;
+
+      if (!targetSessionId) {
+        statusDot.className = 'status-dot error';
+        statusText.textContent = 'Ошибка: не указан session ID в QR-коде';
+        return;
+      }
+
+      // Инициализация WebRTC PeerJS
+      initPeerConnection();
+
+      function initPeerConnection() {
+        statusDot.className = 'status-dot';
+        statusText.textContent = 'Подключение к компьютеру...';
+
+        try {
+          peer = new Peer({
+            debug: 1,
+            config: {
+              iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun.cloudflare.com:3478' }
+              ]
+            }
+          });
+
+          peer.on('open', (myId) => {
+            console.log('Mobile peer opened:', myId);
+            connectToHost();
+          });
+
+          peer.on('error', (err) => {
+            console.error('Peer error:', err);
+            statusDot.className = 'status-dot error';
+            statusText.textContent = 'Ошибка соединения. Повтор через 3 сек...';
+            setTimeout(initPeerConnection, 3000);
+          });
+        } catch (e) {
+          console.error('PeerJS init failed:', e);
+        }
+      }
+
+      function connectToHost() {
+        conn = peer.connect(targetSessionId, { reliable: true });
+
+        conn.on('open', () => {
+          console.log('Connected to PC host:', targetSessionId);
+          statusDot.className = 'status-dot connected';
+          statusText.textContent = '🟢 Подключено к вашему компьютеру!';
+          checkCanSubmit();
+        });
+
+        conn.on('close', () => {
+          statusDot.className = 'status-dot';
+          statusText.textContent = 'Соединение закрыто. Переподключение...';
+          setTimeout(connectToHost, 2000);
+        });
+
+        conn.on('error', (err) => {
+          console.error('Connection error:', err);
+        });
+      }
+
+      // Обработка выбора файлов
+      inputVideo.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          videoFile = e.target.files[0];
+          showPreview(videoFile, imgVideo, nameVideo, sizeVideo, previewVideo, zoneVideo, cardVideo);
+          checkCanSubmit();
+        }
+      });
+
+      inputBoard.addEventListener('change', (e) => {
+        if (e.target.files && e.target.files[0]) {
+          boardFile = e.target.files[0];
+          showPreview(boardFile, imgBoard, nameBoard, sizeBoard, previewBoard, zoneBoard, cardBoard);
+          checkCanSubmit();
+        }
+      });
+
+      removeVideo.addEventListener('click', () => {
+        videoFile = null;
+        inputVideo.value = '';
+        previewVideo.style.display = 'none';
+        zoneVideo.style.display = 'block';
+        cardVideo.classList.remove('has-file');
+        checkCanSubmit();
+      });
+
+      removeBoard.addEventListener('click', () => {
+        boardFile = null;
+        inputBoard.value = '';
+        previewBoard.style.display = 'none';
+        zoneBoard.style.display = 'block';
+        cardBoard.classList.remove('has-file');
+        checkCanSubmit();
+      });
+
+      function showPreview(file, imgEl, nameEl, sizeEl, previewBox, zoneBox, cardBox) {
+        nameEl.textContent = file.name;
+        sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imgEl.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+
+        zoneBox.style.display = 'none';
+        previewBox.style.display = 'flex';
+        cardBox.classList.add('has-file');
+      }
+
+      function checkCanSubmit() {
+        const hasAny = (videoFile !== null) || (boardFile !== null);
+        btnSubmit.disabled = !hasAny;
+      }
+
+      // Сжатие изображения для быстрой и надежной передачи по WebRTC
+      async function readFileAsOptimizedDataUrl(file) {
+        if (!file) return null;
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              // Если фото огромное (например, 4000x3000 с камеры), масштабируем до 2048px макс
+              const maxDim = 2048;
+              let width = img.width;
+              let height = img.height;
+
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+              resolve(compressedDataUrl);
+            };
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // Отправка фотографий на компьютер
+      btnSubmit.addEventListener('click', async () => {
+        if (!conn || !conn.open) {
+          alert('Нет подключения к компьютеру. Пожалуйста, подождите или обновите страницу.');
+          return;
+        }
+
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<span>⏳ Отправка фотографий...</span>';
+
+        try {
+          const videoData = await readFileAsOptimizedDataUrl(videoFile);
+          const boardData = await readFileAsOptimizedDataUrl(boardFile);
+
+          const payload = {
+            type: 'PHOTOS',
+            videoPhoto: videoData,
+            videoName: videoFile ? videoFile.name : 'video.jpg',
+            boardPhoto: boardData,
+            boardName: boardFile ? boardFile.name : 'board.jpg'
+          };
+
+          conn.send(payload);
+          console.log('Photos sent successfully via WebRTC!');
+
+          // Показываем экран успеха
+          mainContent.style.display = 'none';
+          submitBar.style.display = 'none';
+          successScreen.style.display = 'block';
+        } catch (err) {
+          console.error('Failed to send photos:', err);
+          alert('Ошибка при отправке: ' + err.message);
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = '<span>📤 Отправить на компьютер</span>';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
