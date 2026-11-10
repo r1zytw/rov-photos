@@ -5,6 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Загрузка фото — Разговоры о важном</title>
   <style>
+    /* ==========================================================================
+       Мобильная страница загрузки фото v2.5.0 — Строго Material 3 (Light & Dark)
+       ========================================================================== */
+    :root {
+      --m3-font: 'Google Sans Text', 'Google Sans', 'Roboto Flex', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      --m3-font-display: 'Google Sans', 'Roboto Flex', Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+      --m3-surface: #FAF8FD;
+      --m3-surface-low: #F4F3FA;
+      --m3-surface-mid: #EEEDF4;
+      --m3-surface-high: #E8E7EF;
+      --m3-surface-highest: #E2E2E9;
+      --m3-on-surface: #1A1B21;
+      --m3-on-surface-variant: #45464F;
+      --m3-outline: #757780;
+      --m3-outline-variant: #C5C6D0;
+
+      --m3-primary: #435A8C;
+      --m3-on-primary: #FFFFFF;
+      --m3-primary-container: #D8E2FF;
+      --m3-on-primary-container: #142C5A;
+      --m3-secondary-container: #DCE2F9;
+      --m3-on-secondary-container: #141B2C;
+
+      --m3-success: #3B6A52;
+      --m3-success-container: #C9EBD5;
+      --m3-on-success-container: #0B2E1D;
+      --m3-warning-container: #FFDEAC;
+      --m3-on-warning-container: #2A1800;
+      --m3-error: #BA1A1A;
+      --m3-error-container: #FFDAD6;
+      --m3-on-error-container: #410002;
+
+      --m3-ease: cubic-bezier(0.2, 0, 0, 1);
+      --m3-ease-out: cubic-bezier(0.05, 0.7, 0.1, 1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --m3-surface: #121318;
+        --m3-surface-low: #1A1B21;
+        --m3-surface-mid: #1E1F25;
+        --m3-surface-high: #282A2F;
+        --m3-surface-highest: #33353A;
+        --m3-on-surface: #E3E2E9;
+        --m3-on-surface-variant: #C5C6D0;
+        --m3-outline: #8F9099;
+        --m3-outline-variant: #45464F;
+
+        --m3-primary: #AEC6FF;
+        --m3-on-primary: #102F60;
+        --m3-primary-container: #2A4677;
+        --m3-on-primary-container: #D8E2FF;
+        --m3-secondary-container: #3E4759;
+        --m3-on-secondary-container: #DCE2F9;
+
+        --m3-success: #9FD4B4;
+        --m3-success-container: #22513A;
+        --m3-on-success-container: #C9EBD5;
+        --m3-warning-container: #5C4207;
+        --m3-on-warning-container: #FFDEAC;
+        --m3-error: #FFB4AB;
+        --m3-error-container: #93000A;
+        --m3-on-error-container: #FFDAD6;
+      }
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,70 +80,102 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background: #f1f5f9;
-      color: #0f172a;
+      font-family: var(--m3-font);
+      background: var(--m3-surface);
+      color: var(--m3-on-surface);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
-    header {
-      background: linear-gradient(135deg, #1e40af, #2563eb);
-      color: #ffffff;
-      padding: 16px 20px;
-      text-align: center;
-      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.2);
+    /* M3 Top App Bar */
+    .top-app-bar {
+      background: var(--m3-surface-low);
+      padding: 16px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--m3-outline-variant);
     }
 
-    header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    header p {
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .status-bar {
-      background: #ffffff;
-      padding: 12px 16px;
+    .app-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--m3-primary-container);
+      color: var(--m3-on-primary-container);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      font-size: 13.5px;
+      flex-shrink: 0;
+    }
+
+    .app-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .app-title {
+      font-family: var(--m3-font-display);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .app-sub {
+      font-size: 12px;
+      color: var(--m3-on-surface-variant);
+      margin-top: 2px;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
+      font-size: 12px;
       font-weight: 600;
-      border-bottom: 1px solid #e2e8f0;
-      transition: all 0.2s;
+      background: var(--m3-warning-container);
+      color: var(--m3-on-warning-container);
+      white-space: nowrap;
+      transition: background 0.25s var(--m3-ease), color 0.25s var(--m3-ease);
+    }
+
+    .status-pill.connected {
+      background: var(--m3-success-container);
+      color: var(--m3-on-success-container);
+    }
+
+    .status-pill.error {
+      background: var(--m3-error-container);
+      color: var(--m3-on-error-container);
     }
 
     .status-dot {
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      background: #f59e0b;
-      display: inline-block;
-      flex-shrink: 0;
-      animation: pulse 1.5s infinite;
+      background: currentColor;
+      animation: pulse 1.6s infinite ease-in-out;
     }
 
-    .status-dot.connected {
-      background: #10b981;
-      animation: none;
-    }
-
-    .status-dot.error {
-      background: #ef4444;
+    .status-pill.connected .status-dot {
       animation: none;
     }
 
     @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.7; }
+      0%, 100% { transform: scale(0.85); opacity: 0.5; }
       50% { transform: scale(1.15); opacity: 1; }
-      100% { transform: scale(0.9); opacity: 0.7; }
     }
 
     main {
@@ -85,88 +184,147 @@
       max-width: 480px;
       margin: 0 auto;
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    .instructions {
-      background: #e0f2fe;
-      border: 1px solid #bae6fd;
-      border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
+    .banner {
+      background: var(--m3-secondary-container);
+      color: var(--m3-on-secondary-container);
+      border-radius: 20px;
+      padding: 13px 16px;
       font-size: 13px;
-      color: #0369a1;
-      line-height: 1.4;
+      line-height: 1.45;
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 11px;
     }
 
-    .card {
-      background: #ffffff;
+    .banner svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .error-banner {
+      display: none;
+      background: var(--m3-error-container);
+      color: var(--m3-on-error-container);
       border-radius: 16px;
+      padding: 12px 15px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .error-banner.is-visible {
+      display: block;
+    }
+
+    /* M3 Tonal Cards */
+    .slot-card {
+      background: var(--m3-surface-low);
+      border-radius: 24px;
       padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      border: 1.5px solid #e2e8f0;
-      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 1px 3px 1px rgba(0, 0, 0, 0.04);
+      border: 1px solid transparent;
+      transition: background 0.25s var(--m3-ease), border-color 0.25s var(--m3-ease);
     }
 
-    .card.has-file {
-      border-color: #10b981;
-      background: #f0fdf4;
+    .slot-card.has-file {
+      background: var(--m3-surface-mid);
+      border-color: var(--m3-primary);
     }
 
-    .card-header {
+    .slot-card.is-sent {
+      background: var(--m3-surface-mid);
+      border-color: var(--m3-success);
+    }
+
+    .slot-head {
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 10px;
       margin-bottom: 12px;
     }
 
-    .card-icon {
-      font-size: 22px;
-      width: 38px;
-      height: 38px;
-      background: #f8fafc;
-      border-radius: 10px;
+    .slot-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .slot-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--m3-surface-high);
+      color: var(--m3-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #e2e8f0;
+      flex-shrink: 0;
     }
 
-    .card-title {
-      font-size: 14.5px;
+    .slot-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .slot-title {
+      font-family: var(--m3-font-display);
+      font-size: 15px;
       font-weight: 700;
-      color: #1e293b;
       line-height: 1.25;
     }
 
-    .card-sub {
-      font-size: 11.5px;
-      color: #64748b;
+    .slot-sub {
+      font-size: 12px;
+      color: var(--m3-on-surface-variant);
       margin-top: 2px;
     }
 
+    .sent-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: var(--m3-success-container);
+      color: var(--m3-on-success-container);
+      font-size: 11.5px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .slot-card.is-sent .sent-badge {
+      display: inline-flex;
+    }
+
     .upload-zone {
-      border: 2px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 20px 12px;
-      text-align: center;
-      cursor: pointer;
-      background: #f8fafc;
       position: relative;
-      transition: background 0.15s;
+      border: 1.5px dashed var(--m3-outline);
+      border-radius: 18px;
+      padding: 20px 14px;
+      text-align: center;
+      background: var(--m3-surface-mid);
+      cursor: pointer;
+      transition: background 0.2s var(--m3-ease), border-color 0.2s var(--m3-ease), border-radius 0.2s var(--m3-ease);
     }
 
     .upload-zone:active {
-      background: #f1f5f9;
+      background: var(--m3-surface-high);
+      border-radius: 12px;
     }
 
     .file-input {
       position: absolute;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100%;
       height: 100%;
       opacity: 0;
@@ -174,275 +332,393 @@
     }
 
     .upload-label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #2563eb;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--m3-primary);
     }
 
-    .upload-label span:last-child {
+    .upload-label svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .upload-label small {
       font-size: 12px;
-      color: #64748b;
       font-weight: 400;
+      color: var(--m3-on-surface-variant);
     }
 
     .preview-box {
       display: none;
       align-items: center;
       gap: 12px;
-      margin-top: 6px;
-      padding: 6px;
+      padding: 6px 4px 2px;
     }
 
     .preview-img {
-      width: 64px;
-      height: 64px;
+      width: 68px;
+      height: 68px;
       object-fit: cover;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      background: #e2e8f0;
+      border-radius: 14px;
+      background: var(--m3-surface-highest);
+      flex-shrink: 0;
     }
 
     .preview-info {
       flex: 1;
-      font-size: 13px;
       min-width: 0;
     }
 
     .preview-name {
+      font-size: 13.5px;
       font-weight: 600;
-      color: #0f172a;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
 
-    .preview-size {
-      color: #15803d;
-      font-size: 11.5px;
-      font-weight: 500;
-      margin-top: 2px;
+    .preview-meta {
+      margin-top: 3px;
+      font-size: 12px;
+      color: var(--m3-success);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
     }
 
-    .btn-remove {
-      background: #fee2e2;
-      color: #b91c1c;
+    .btn-tonal-danger {
+      background: var(--m3-error-container);
+      color: var(--m3-on-error-container);
       border: none;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 12px;
+      border-radius: 14px;
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
+      transition: border-radius 0.2s var(--m3-ease);
     }
 
+    .btn-tonal-danger:active {
+      border-radius: 8px;
+    }
+
+    /* Sticky Bottom Action Bar */
     .submit-bar {
-      padding: 16px;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
       position: sticky;
       bottom: 0;
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+      background: var(--m3-surface-low);
+      border-top: 1px solid var(--m3-outline-variant);
+      padding: 14px 16px 18px;
     }
 
-    .btn-submit {
+    .m3-btn {
       width: 100%;
-      background: linear-gradient(135deg, #16a34a, #15803d);
-      color: #ffffff;
+      min-height: 52px;
+      padding: 0 24px;
       border: none;
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 700;
+      border-radius: 26px;
+      background: var(--m3-primary);
+      color: var(--m3-on-primary);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-      transition: all 0.2s;
+      gap: 10px;
+      transition: border-radius 0.25s var(--m3-ease), background 0.2s var(--m3-ease), opacity 0.2s var(--m3-ease);
     }
 
-    .btn-submit:disabled {
-      background: #cbd5e1;
-      box-shadow: none;
+    .m3-btn:not(:disabled):active {
+      border-radius: 14px;
+    }
+
+    .m3-btn:disabled {
+      background: var(--m3-surface-highest);
+      color: var(--m3-outline);
       cursor: not-allowed;
-      color: #64748b;
     }
 
-    .btn-submit:not(:disabled):active {
-      transform: scale(0.98);
+    .m3-btn--tonal {
+      background: var(--m3-secondary-container);
+      color: var(--m3-on-secondary-container);
+      margin-top: 12px;
     }
 
+    /* Экран подтверждения */
     .success-screen {
       display: none;
-      text-align: center;
-      padding: 40px 20px;
-      background: #ffffff;
-      border-radius: 16px;
-      margin: 20px auto;
       max-width: 480px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      margin: 20px auto;
+      padding: 28px 20px;
+      text-align: center;
     }
 
-    .success-icon {
-      font-size: 64px;
+    .success-screen.is-visible {
+      display: block;
+    }
+
+    .success-card {
+      background: var(--m3-surface-low);
+      border-radius: 28px;
+      padding: 28px 22px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .success-badge {
+      width: 64px;
+      height: 64px;
+      border-radius: 22px;
+      background: var(--m3-success-container);
+      color: var(--m3-on-success-container);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       margin-bottom: 16px;
     }
 
+    .success-badge svg {
+      width: 34px;
+      height: 34px;
+    }
+
     .success-title {
-      font-size: 21px;
+      font-family: var(--m3-font-display);
+      font-size: 20px;
       font-weight: 700;
-      color: #15803d;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .success-text {
-      font-size: 14.5px;
-      color: #475569;
-      line-height: 1.6;
+      font-size: 14px;
+      color: var(--m3-on-surface-variant);
+      line-height: 1.5;
     }
 
-    .success-highlight {
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
-      border-radius: 10px;
-      padding: 12px;
+    .success-callout {
       margin-top: 16px;
+      padding: 13px 16px;
+      border-radius: 16px;
+      background: var(--m3-primary-container);
+      color: var(--m3-on-primary-container);
+      font-size: 13.5px;
       font-weight: 600;
-      color: #166534;
+      line-height: 1.45;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🇷🇺 Разговоры о важном</h1>
-    <p>Быстрая загрузка фотографий к отчёту</p>
+  <header class="top-app-bar">
+    <div class="app-brand">
+      <div class="app-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/>
+          <path d="M14 3v5h5"/>
+          <path d="M9 14.5l2 2 4-4"/>
+        </svg>
+      </div>
+      <div>
+        <div class="app-title">Разговоры о важном</div>
+        <div class="app-sub">МБОУ «Лицей Крымской весны»</div>
+      </div>
+    </div>
+    <div class="status-pill" id="status-pill">
+      <span class="status-dot"></span>
+      <span id="status-text">Связь…</span>
+    </div>
   </header>
 
-  <div class="status-bar">
-    <span id="status-dot" class="status-dot"></span>
-    <span id="status-text">Подключение к компьютеру...</span>
-  </div>
-
   <main id="main-content">
-    <div class="instructions">
-      <span>ℹ️</span>
-      <span>Сделайте или выберите из галереи 2 фотографии. Они сразу будут переданы на компьютер в Яндекс.Форму.</span>
+    <div class="banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 12v4"/>
+      </svg>
+      <span>Выберите 1 или 2 фотографии — они автоматически сожмутся и прикрепятся к полям Яндекс.Формы на компьютере. Можно отправить сначала одно фото, а второе позже.</span>
     </div>
 
+    <div class="error-banner" id="error-banner"></div>
+
     <!-- Слот 1: Видеоролик -->
-    <div id="card-video" class="card">
-      <div class="card-header">
-        <div class="card-icon">🎬</div>
-        <div>
-          <div class="card-title">1. Просмотр видеоролика</div>
-          <div class="card-sub">Фото класса во время просмотра</div>
+    <section class="slot-card" id="card-video">
+      <div class="slot-head">
+        <div class="slot-title-group">
+          <div class="slot-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2.5" y="6" width="13" height="12" rx="2.5"/><path d="M15.5 10.5l6-3.5v10l-6-3.5"/>
+            </svg>
+          </div>
+          <div>
+            <div class="slot-title">1. Просмотр видеоролика</div>
+            <div class="slot-sub">Фото детей со спины во время видео</div>
+          </div>
         </div>
+        <span class="sent-badge">✓ Передано</span>
       </div>
+
       <div class="upload-zone" id="zone-video">
         <input type="file" id="input-video" class="file-input" accept="image/*">
         <div class="upload-label">
-          <span>📷 Сделать фото / Выбрать из галереи</span>
-          <span>Нажмите сюда для выбора</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>Сделать фото или выбрать</span>
+          <small>До 20 МБ · автосжатие без потери чёткости</small>
         </div>
       </div>
+
       <div class="preview-box" id="preview-video">
-        <img id="img-video" class="preview-img" alt="Превью видео">
+        <img id="img-video" class="preview-img" alt="Превью видеоролика">
         <div class="preview-info">
           <div id="name-video" class="preview-name">video.jpg</div>
-          <div id="size-video" class="preview-size">0.0 MB</div>
+          <div id="size-video" class="preview-meta">Готово к отправке</div>
         </div>
-        <button type="button" class="btn-remove" id="remove-video">Удалить</button>
+        <button type="button" class="btn-tonal-danger" id="remove-video">Заменить</button>
       </div>
-    </div>
+    </section>
 
     <!-- Слот 2: Оформление доски -->
-    <div id="card-board" class="card">
-      <div class="card-header">
-        <div class="card-icon">📋</div>
-        <div>
-          <div class="card-title">2. Оформление доски</div>
-          <div class="card-sub">Фото школьной доски с темой занятия</div>
+    <section class="slot-card" id="card-board">
+      <div class="slot-head">
+        <div class="slot-title-group">
+          <div class="slot-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20l4-4 4 4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="slot-title">2. Оформление доски</div>
+            <div class="slot-sub">Фото детей со спины, где видна доска</div>
+          </div>
         </div>
+        <span class="sent-badge">✓ Передано</span>
       </div>
+
       <div class="upload-zone" id="zone-board">
         <input type="file" id="input-board" class="file-input" accept="image/*">
         <div class="upload-label">
-          <span>📷 Сделать фото / Выбрать из галереи</span>
-          <span>Нажмите сюда для выбора</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>Сделать фото или выбрать</span>
+          <small>До 20 МБ · автосжатие без потери чёткости</small>
         </div>
       </div>
+
       <div class="preview-box" id="preview-board">
         <img id="img-board" class="preview-img" alt="Превью доски">
         <div class="preview-info">
           <div id="name-board" class="preview-name">board.jpg</div>
-          <div id="size-board" class="preview-size">0.0 MB</div>
+          <div id="size-board" class="preview-meta">Готово к отправке</div>
         </div>
-        <button type="button" class="btn-remove" id="remove-board">Удалить</button>
+        <button type="button" class="btn-tonal-danger" id="remove-board">Заменить</button>
       </div>
-    </div>
+    </section>
   </main>
 
   <div class="submit-bar" id="submit-bar">
-    <button type="button" id="btn-submit" class="btn-submit" disabled>
-      <span>📤 Отправить на компьютер</span>
+    <button type="button" id="btn-submit" class="m3-btn" disabled>
+      <span id="btn-submit-label">Выберите фотографию</span>
     </button>
   </div>
 
-  <div class="success-screen" id="success-screen">
-    <div class="success-icon">🎉</div>
-    <div class="success-title">Фотографии переданы!</div>
-    <div class="success-text">
-      Они автоматически прикреплены к полям Яндекс.Формы на вашем компьютере.
+  <section class="success-screen" id="success-screen">
+    <div class="success-card">
+      <div class="success-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.5l4.5 4.5L19 7.5"/>
+        </svg>
+      </div>
+      <div class="success-title" id="success-title">Фотографии переданы!</div>
+      <div class="success-text" id="success-text">
+        Они автоматически прикреплены к полям Яндекс.Формы на вашем компьютере.
+      </div>
+      <div class="success-callout">
+        Вернитесь к компьютеру и нажмите кнопку «Отправить на проверку» внизу формы.
+      </div>
+      <button type="button" id="btn-more" class="m3-btn m3-btn--tonal">
+        <span id="btn-more-label">Доотправить или заменить фото</span>
+      </button>
     </div>
-    <div class="success-highlight">
-      👉 Вернитесь за компьютер и нажмите синюю кнопку <strong>«Отправить»</strong> внизу формы!
-    </div>
-  </div>
+  </section>
 
   <script>
     (function () {
+      const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 МБ лимит Яндекс.Формы
       const urlParams = new URLSearchParams(window.location.search);
       const targetSessionId = urlParams.get('session');
 
-      const statusDot = document.getElementById('status-dot');
+      const statusPill = document.getElementById('status-pill');
       const statusText = document.getElementById('status-text');
+      const errorBanner = document.getElementById('error-banner');
       const btnSubmit = document.getElementById('btn-submit');
+      const btnSubmitLabel = document.getElementById('btn-submit-label');
       const mainContent = document.getElementById('main-content');
       const submitBar = document.getElementById('submit-bar');
       const successScreen = document.getElementById('success-screen');
+      const successTitle = document.getElementById('success-title');
+      const successText = document.getElementById('success-text');
+      const btnMore = document.getElementById('btn-more');
+      const btnMoreLabel = document.getElementById('btn-more-label');
 
-      const inputVideo = document.getElementById('input-video');
-      const inputBoard = document.getElementById('input-board');
-      const zoneVideo = document.getElementById('zone-video');
-      const zoneBoard = document.getElementById('zone-board');
-      const previewVideo = document.getElementById('preview-video');
-      const previewBoard = document.getElementById('preview-board');
-      const imgVideo = document.getElementById('img-video');
-      const imgBoard = document.getElementById('img-board');
-      const nameVideo = document.getElementById('name-video');
-      const nameBoard = document.getElementById('name-board');
-      const sizeVideo = document.getElementById('size-video');
-      const sizeBoard = document.getElementById('size-board');
-      const removeVideo = document.getElementById('remove-video');
-      const removeBoard = document.getElementById('remove-board');
-      const cardVideo = document.getElementById('card-video');
-      const cardBoard = document.getElementById('card-board');
+      const slots = {
+        video: {
+          titleHeader: 'VIDEO_PHOTO',
+          defaultName: 'video_photo.jpg',
+          file: null,
+          blob: null,
+          sent: false,
+          input: document.getElementById('input-video'),
+          zone: document.getElementById('zone-video'),
+          preview: document.getElementById('preview-video'),
+          img: document.getElementById('img-video'),
+          name: document.getElementById('name-video'),
+          size: document.getElementById('size-video'),
+          remove: document.getElementById('remove-video'),
+          card: document.getElementById('card-video')
+        },
+        board: {
+          titleHeader: 'BOARD_PHOTO',
+          defaultName: 'board_photo.jpg',
+          file: null,
+          blob: null,
+          sent: false,
+          input: document.getElementById('input-board'),
+          zone: document.getElementById('zone-board'),
+          preview: document.getElementById('preview-board'),
+          img: document.getElementById('img-board'),
+          name: document.getElementById('name-board'),
+          size: document.getElementById('size-board'),
+          remove: document.getElementById('remove-board'),
+          card: document.getElementById('card-board')
+        }
+      };
 
-      let videoFile = null;
-      let boardFile = null;
-      let isConnected = false;
+      function showError(msg) {
+        if (!msg) {
+          errorBanner.classList.remove('is-visible');
+          errorBanner.textContent = '';
+          return;
+        }
+        errorBanner.textContent = msg;
+        errorBanner.classList.add('is-visible');
+      }
+
+      function formatMb(bytes) {
+        return (bytes / (1024 * 1024)).toFixed(2) + ' МБ';
+      }
 
       if (!targetSessionId) {
-        statusDot.className = 'status-dot error';
-        statusText.textContent = '❌ Не указан ID сессии. Отсканируйте QR-код заново.';
+        statusPill.className = 'status-pill error';
+        statusText.textContent = 'Нет сессии';
+        showError('Не найден код сессии в ссылке. Отсканируйте QR-код на странице Яндекс.Формы заново.');
         return;
       }
 
-      // Мгновенное подключение к компьютеру через защищенный HTTPS-канал
       sendPhonePing();
 
       async function sendPhonePing() {
@@ -450,85 +726,83 @@
           const res = await fetch(`https://ntfy.sh/${targetSessionId}`, {
             method: 'POST',
             body: 'PHONE_PING',
-            headers: {
-              'Title': 'PHONE_PING',
-              'Priority': 'default'
-            }
+            headers: { 'Title': 'PHONE_PING', 'Priority': 'default' }
           });
-
-          if (res.ok) {
-            isConnected = true;
-            statusDot.className = 'status-dot connected';
-            statusText.textContent = '🟢 Подключено к вашему компьютеру!';
-            checkCanSubmit();
-          } else {
-            throw new Error('HTTP ' + res.status);
-          }
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          statusPill.className = 'status-pill connected';
+          statusText.textContent = 'Подключено';
+          updateSubmitState();
         } catch (e) {
-          console.warn('Ping error, retrying in 2.5s...', e);
-          statusDot.className = 'status-dot';
-          statusText.textContent = 'Подключение к компьютеру...';
+          statusPill.className = 'status-pill';
+          statusText.textContent = 'Повтор связи…';
           setTimeout(sendPhonePing, 2500);
         }
       }
 
-      // Обработка выбора файлов
-      inputVideo.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          videoFile = e.target.files[0];
-          showPreview(videoFile, imgVideo, nameVideo, sizeVideo, previewVideo, zoneVideo, cardVideo);
-          checkCanSubmit();
-        }
+      Object.keys(slots).forEach((key) => {
+        const s = slots[key];
+
+        s.input.addEventListener('change', async (e) => {
+          const f = e.target.files && e.target.files[0];
+          if (!f) return;
+          showError('');
+
+          if (f.size > MAX_FILE_BYTES) {
+            showError(`Файл «${f.name}» превышает лимит 20 МБ (${formatMb(f.size)}). Выберите другой снимок.`);
+            s.input.value = '';
+            return;
+          }
+
+          s.file = f;
+          s.sent = false;
+          s.card.classList.remove('is-sent');
+          s.card.classList.add('has-file');
+          s.name.textContent = f.name;
+          s.size.textContent = `${formatMb(f.size)} · сжимаем…`;
+          s.zone.style.display = 'none';
+          s.preview.style.display = 'flex';
+
+          const reader = new FileReader();
+          reader.onload = (ev) => { s.img.src = ev.target.result; };
+          reader.readAsDataURL(f);
+
+          s.blob = await compressImageToBlob(f);
+          s.size.textContent = `${formatMb(f.size)} → ${formatMb(s.blob.size)}`;
+          updateSubmitState();
+        });
+
+        s.remove.addEventListener('click', () => {
+          s.file = null;
+          s.blob = null;
+          s.sent = false;
+          s.input.value = '';
+          s.preview.style.display = 'none';
+          s.zone.style.display = 'block';
+          s.card.classList.remove('has-file', 'is-sent');
+          updateSubmitState();
+        });
       });
 
-      inputBoard.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files[0]) {
-          boardFile = e.target.files[0];
-          showPreview(boardFile, imgBoard, nameBoard, sizeBoard, previewBoard, zoneBoard, cardBoard);
-          checkCanSubmit();
-        }
-      });
-
-      removeVideo.addEventListener('click', () => {
-        videoFile = null;
-        inputVideo.value = '';
-        previewVideo.style.display = 'none';
-        zoneVideo.style.display = 'block';
-        cardVideo.classList.remove('has-file');
-        checkCanSubmit();
-      });
-
-      removeBoard.addEventListener('click', () => {
-        boardFile = null;
-        inputBoard.value = '';
-        previewBoard.style.display = 'none';
-        zoneBoard.style.display = 'block';
-        cardBoard.classList.remove('has-file');
-        checkCanSubmit();
-      });
-
-      function showPreview(file, imgEl, nameEl, sizeEl, previewBox, zoneBox, cardBox) {
-        nameEl.textContent = file.name;
-        sizeEl.textContent = (file.size / (1024 * 1024)).toFixed(2) + ' МБ';
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          imgEl.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-
-        zoneBox.style.display = 'none';
-        previewBox.style.display = 'flex';
-        cardBox.classList.add('has-file');
+      function getUnsentCount() {
+        return (slots.video.file && !slots.video.sent ? 1 : 0) +
+               (slots.board.file && !slots.board.sent ? 1 : 0);
       }
 
-      function checkCanSubmit() {
-        const hasAny = (videoFile !== null) || (boardFile !== null);
-        btnSubmit.disabled = !hasAny;
+      function updateSubmitState() {
+        const unsent = getUnsentCount();
+        btnSubmit.disabled = unsent === 0;
+        if (unsent === 0) {
+          btnSubmitLabel.textContent = (slots.video.sent || slots.board.sent)
+            ? 'Все выбранные фото уже отправлены'
+            : 'Выберите фотографию';
+        } else {
+          btnSubmitLabel.textContent = unsent === 2
+            ? 'Отправить 2 фотографии на компьютер'
+            : 'Отправить фотографию на компьютер';
+        }
       }
 
-      // Оптимизация изображения перед отправкой (макс 1600px, отличное качество при весе ~300 КБ)
       async function compressImageToBlob(file) {
-        if (!file) return null;
         return new Promise((resolve) => {
           const reader = new FileReader();
           reader.onload = (e) => {
@@ -537,7 +811,6 @@
               const maxDim = 1600;
               let width = img.width;
               let height = img.height;
-
               if (width > maxDim || height > maxDim) {
                 if (width > height) {
                   height = Math.round((height * maxDim) / width);
@@ -547,16 +820,11 @@
                   height = maxDim;
                 }
               }
-
               const canvas = document.createElement('canvas');
               canvas.width = width;
               canvas.height = height;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, width, height);
-
-              canvas.toBlob((blob) => {
-                resolve(blob || file);
-              }, 'image/jpeg', 0.85);
+              canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+              canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.85);
             };
             img.onerror = () => resolve(file);
             img.src = e.target.result;
@@ -566,57 +834,60 @@
         });
       }
 
-      // Отправка фотографий на компьютер через надежный HTTPS
       btnSubmit.addEventListener('click', async () => {
+        showError('');
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = '<span>⏳ Оптимизация и отправка...</span>';
 
         try {
-          // 1. Отправляем фото видеоролика
-          if (videoFile) {
-            btnSubmit.innerHTML = '<span>⏳ Передача фото 1 (видео)...</span>';
-            const videoBlob = await compressImageToBlob(videoFile);
-            const res1 = await fetch(`https://ntfy.sh/${targetSessionId}`, {
+          for (const key of ['video', 'board']) {
+            const s = slots[key];
+            if (!s.file || s.sent) continue;
+
+            btnSubmitLabel.textContent = key === 'video'
+              ? 'Передача фото 1 (видеоролик)…'
+              : 'Передача фото 2 (доска)…';
+
+            const payload = s.blob || await compressImageToBlob(s.file);
+            const res = await fetch(`https://ntfy.sh/${targetSessionId}`, {
               method: 'PUT',
               headers: {
-                'Title': 'VIDEO_PHOTO',
-                'Filename': videoFile.name || 'video_photo.jpg',
+                'Title': s.titleHeader,
+                'Filename': s.defaultName,
                 'Priority': 'urgent'
               },
-              body: videoBlob
+              body: payload
             });
-            if (!res1.ok) throw new Error('Ошибка отправки фото 1 (HTTP ' + res1.status + ')');
+            if (!res.ok) throw new Error(`Ошибка отправки (HTTP ${res.status})`);
+            s.sent = true;
+            s.card.classList.add('is-sent');
           }
 
-          // 2. Отправляем фото доски
-          if (boardFile) {
-            btnSubmit.innerHTML = '<span>⏳ Передача фото 2 (доска)...</span>';
-            const boardBlob = await compressImageToBlob(boardFile);
-            const res2 = await fetch(`https://ntfy.sh/${targetSessionId}`, {
-              method: 'PUT',
-              headers: {
-                'Title': 'BOARD_PHOTO',
-                'Filename': boardFile.name || 'board_photo.jpg',
-                'Priority': 'urgent'
-              },
-              body: boardBlob
-            });
-            if (!res2.ok) throw new Error('Ошибка отправки фото 2 (HTTP ' + res2.status + ')');
-          }
-
-          // Показываем экран успешной отправки
+          const totalSent = (slots.video.sent ? 1 : 0) + (slots.board.sent ? 1 : 0);
           mainContent.style.display = 'none';
           submitBar.style.display = 'none';
-          statusDot.className = 'status-dot connected';
-          statusText.textContent = '✅ Фотографии успешно доставлены!';
-          successScreen.style.display = 'block';
+          successScreen.classList.add('is-visible');
 
+          if (totalSent < 2) {
+            const remaining = !slots.video.sent ? 'просмотра видеоролика' : 'оформления доски';
+            successTitle.textContent = 'Первое фото отправлено!';
+            successText.textContent = `Снимок уже прикреплён к форме на компьютере. Вы можете сразу или позже доотправить второе фото (${remaining}).`;
+            btnMoreLabel.textContent = 'Доотправить второе фото';
+          } else {
+            successTitle.textContent = 'Обе фотографии переданы!';
+            successText.textContent = 'Оба снимка автоматически прикреплены к полям Яндекс.Формы на вашем компьютере.';
+            btnMoreLabel.textContent = 'Заменить фотографии';
+          }
         } catch (err) {
-          console.error('Failed to send photos:', err);
-          alert('Ошибка при передаче фото: ' + err.message + '\nПожалуйста, попробуйте еще раз.');
-          btnSubmit.disabled = false;
-          btnSubmit.innerHTML = '<span>📤 Отправить на компьютер</span>';
+          showError('Не удалось передать фото: ' + (err.message || err) + '. Проверьте подключение и попробуйте снова.');
+          updateSubmitState();
         }
+      });
+
+      btnMore.addEventListener('click', () => {
+        successScreen.classList.remove('is-visible');
+        mainContent.style.display = 'flex';
+        submitBar.style.display = 'block';
+        updateSubmitState();
       });
     })();
   </script>
