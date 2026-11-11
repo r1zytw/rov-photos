@@ -719,23 +719,62 @@
         return;
       }
 
+      const preferredRelay = urlParams.get('relay');
+      const DEFAULT_RELAYS = [
+        'https://ntfy.hostux.net',
+        'https://ntfy.envs.net',
+        'https://ntfy.adminforge.de',
+        'https://ntfy.sh'
+      ];
+      const RELAY_SERVERS = preferredRelay && /^https:\/\/[a-z0-9.-]+$/i.test(preferredRelay)
+        ? [preferredRelay, ...DEFAULT_RELAYS.filter((r) => r !== preferredRelay)]
+        : DEFAULT_RELAYS;
+
+      let workingRelays = [...RELAY_SERVERS];
+
+      async function fetchWithTimeout(url, options = {}, timeoutMs = 4500) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+          return await fetch(url, { ...options, signal: controller.signal });
+        } finally {
+          clearTimeout(timer);
+        }
+      }
+
       sendPhonePing();
 
       async function sendPhonePing() {
         try {
-          const res = await fetch(`https://ntfy.sh/${targetSessionId}`, {
-            method: 'POST',
-            body: 'PHONE_PING',
-            headers: { 'Title': 'PHONE_PING', 'Priority': 'default' }
-          });
-          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const results = await Promise.allSettled(
+            RELAY_SERVERS.map(async (srv) => {
+              const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
+                method: 'POST',
+                body: 'PHONE_PING',
+                headers: { 'Title': 'PHONE_PING', 'Priority': 'default' }
+              }, 4500);
+              if (!res.ok) throw new Error('HTTP ' + res.status);
+              return srv;
+            })
+          );
+
+          const succeeded = results
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value);
+
+          if (succeeded.length === 0) throw new Error('Все серверы недоступны');
+
+          workingRelays = [
+            ...succeeded,
+            ...RELAY_SERVERS.filter((r) => !succeeded.includes(r))
+          ];
           statusPill.className = 'status-pill connected';
           statusText.textContent = 'Подключено';
           updateSubmitState();
         } catch (e) {
           statusPill.className = 'status-pill';
           statusText.textContent = 'Повтор связи…';
-          setTimeout(sendPhonePing, 2500);
+          setTimeout(sendPhonePing, 2200);
         }
       }
 
@@ -834,6 +873,54 @@
         });
       }
 
+      async function uploadSlotToRelays(s, payload) {
+        const candidates = workingRelays.length ? workingRelays : RELAY_SERVERS;
+        let deliveredCount = 0;
+        let lastError = null;
+
+        // Отправляем на 2 лучших рабочих сервера параллельно для 100% надёжности
+        const primaryPair = candidates.slice(0, 2);
+        const pairResults = await Promise.allSettled(
+          primaryPair.map(async (srv) => {
+            const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
+              method: 'PUT',
+              headers: {
+                'Title': s.titleHeader,
+                'Filename': s.defaultName,
+                'Priority': 'urgent'
+              },
+              body: payload
+            }, 12000);
+            if (!res.ok) throw new Error(`${srv}: HTTP ${res.status}`);
+            return srv;
+          })
+        );
+
+        deliveredCount = pairResults.filter((r) => r.status === 'fulfilled').length;
+        if (deliveredCount > 0) return true;
+
+        // Если первая пара не ответила — пробуем оставшиеся серверы по очереди
+        for (const srv of candidates.slice(2)) {
+          try {
+            const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
+              method: 'PUT',
+              headers: {
+                'Title': s.titleHeader,
+                'Filename': s.defaultName,
+                'Priority': 'urgent'
+              },
+              body: payload
+            }, 12000);
+            if (res.ok) return true;
+            lastError = new Error(`HTTP ${res.status}`);
+          } catch (e) {
+            lastError = e;
+          }
+        }
+
+        throw lastError || new Error('Нет доступных серверов передачи');
+      }
+
       btnSubmit.addEventListener('click', async () => {
         showError('');
         btnSubmit.disabled = true;
@@ -848,16 +935,7 @@
               : 'Передача фото 2 (доска)…';
 
             const payload = s.blob || await compressImageToBlob(s.file);
-            const res = await fetch(`https://ntfy.sh/${targetSessionId}`, {
-              method: 'PUT',
-              headers: {
-                'Title': s.titleHeader,
-                'Filename': s.defaultName,
-                'Priority': 'urgent'
-              },
-              body: payload
-            });
-            if (!res.ok) throw new Error(`Ошибка отправки (HTTP ${res.status})`);
+            await uploadSlotToRelays(s, payload);
             s.sent = true;
             s.card.classList.add('is-sent');
           }
