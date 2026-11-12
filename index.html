@@ -730,13 +730,24 @@
         ? [preferredRelay, ...DEFAULT_RELAYS.filter((r) => r !== preferredRelay)]
         : DEFAULT_RELAYS;
 
-      let workingRelays = [...RELAY_SERVERS];
+      let workingRelays = [];
 
       async function fetchWithTimeout(url, options = {}, timeoutMs = 4500) {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        const timer = setTimeout(() => {
+          try {
+            controller.abort(new Error('Превышено время ожидания сервера'));
+          } catch (e) {
+            controller.abort();
+          }
+        }, timeoutMs);
         try {
           return await fetch(url, { ...options, signal: controller.signal });
+        } catch (err) {
+          if (err && (err.name === 'AbortError' || String(err.message || err).includes('aborted'))) {
+            throw new Error('Сервер не ответил вовремя (таймаут соединения)');
+          }
+          throw err;
         } finally {
           clearTimeout(timer);
         }
@@ -745,36 +756,31 @@
       sendPhonePing();
 
       async function sendPhonePing() {
+        const verified = [];
+        const pingPromises = RELAY_SERVERS.map(async (srv) => {
+          const startedAt = Date.now();
+          const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
+            method: 'POST',
+            body: 'PHONE_PING',
+            headers: { 'Title': 'PHONE_PING', 'Priority': 'default' }
+          }, 4000);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const latency = Date.now() - startedAt;
+          verified.push({ srv, latency });
+          verified.sort((a, b) => a.latency - b.latency);
+          workingRelays = verified.map((v) => v.srv);
+          return srv;
+        });
+
         try {
-          const results = await Promise.allSettled(
-            RELAY_SERVERS.map(async (srv) => {
-              const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
-                method: 'POST',
-                body: 'PHONE_PING',
-                headers: { 'Title': 'PHONE_PING', 'Priority': 'default' }
-              }, 4500);
-              if (!res.ok) throw new Error('HTTP ' + res.status);
-              return srv;
-            })
-          );
-
-          const succeeded = results
-            .filter((r) => r.status === 'fulfilled')
-            .map((r) => r.value);
-
-          if (succeeded.length === 0) throw new Error('Все серверы недоступны');
-
-          workingRelays = [
-            ...succeeded,
-            ...RELAY_SERVERS.filter((r) => !succeeded.includes(r))
-          ];
+          await Promise.any(pingPromises);
           statusPill.className = 'status-pill connected';
           statusText.textContent = 'Подключено';
           updateSubmitState();
         } catch (e) {
           statusPill.className = 'status-pill';
           statusText.textContent = 'Повтор связи…';
-          setTimeout(sendPhonePing, 2200);
+          setTimeout(sendPhonePing, 2000);
         }
       }
 
@@ -847,7 +853,7 @@
           reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-              const maxDim = 1600;
+              const maxDim = 1280;
               let width = img.width;
               let height = img.height;
               if (width > maxDim || height > maxDim) {
@@ -863,7 +869,7 @@
               canvas.width = width;
               canvas.height = height;
               canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-              canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.85);
+              canvas.toBlob((blob) => resolve(blob || file), 'image/jpeg', 0.78);
             };
             img.onerror = () => resolve(file);
             img.src = e.target.result;
@@ -874,33 +880,16 @@
       }
 
       async function uploadSlotToRelays(s, payload) {
-        const candidates = workingRelays.length ? workingRelays : RELAY_SERVERS;
-        let deliveredCount = 0;
+        // Сначала проверенные самые быстрые серверы, затем остальные в резерве
+        const ordered = [
+          ...workingRelays,
+          ...RELAY_SERVERS.filter((r) => !workingRelays.includes(r))
+        ];
         let lastError = null;
 
-        // Отправляем на 2 лучших рабочих сервера параллельно для 100% надёжности
-        const primaryPair = candidates.slice(0, 2);
-        const pairResults = await Promise.allSettled(
-          primaryPair.map(async (srv) => {
-            const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
-              method: 'PUT',
-              headers: {
-                'Title': s.titleHeader,
-                'Filename': s.defaultName,
-                'Priority': 'urgent'
-              },
-              body: payload
-            }, 12000);
-            if (!res.ok) throw new Error(`${srv}: HTTP ${res.status}`);
-            return srv;
-          })
-        );
-
-        deliveredCount = pairResults.filter((r) => r.status === 'fulfilled').length;
-        if (deliveredCount > 0) return true;
-
-        // Если первая пара не ответила — пробуем оставшиеся серверы по очереди
-        for (const srv of candidates.slice(2)) {
+        // Передаём на один самый быстрый сервер (не раздваивая мобильный канал),
+        // и только при сбое мгновенно переключаемся на следующий
+        for (const srv of ordered) {
           try {
             const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
               method: 'PUT',
@@ -910,9 +899,13 @@
                 'Priority': 'urgent'
               },
               body: payload
-            }, 12000);
-            if (res.ok) return true;
-            lastError = new Error(`HTTP ${res.status}`);
+            }, 22000);
+            if (res.ok) {
+              // Закрепляем успешный сервер первым в списке
+              workingRelays = [srv, ...workingRelays.filter((r) => r !== srv)];
+              return true;
+            }
+            lastError = new Error(`Сервер ${srv} вернул HTTP ${res.status}`);
           } catch (e) {
             lastError = e;
           }
