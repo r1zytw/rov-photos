@@ -755,6 +755,8 @@
 
       sendPhonePing();
 
+      let pingRetryDelay = 2000;
+
       async function sendPhonePing() {
         const verified = [];
         const pingPromises = RELAY_SERVERS.map(async (srv) => {
@@ -774,13 +776,16 @@
 
         try {
           await Promise.any(pingPromises);
+          pingRetryDelay = 2000;
           statusPill.className = 'status-pill connected';
           statusText.textContent = 'Подключено';
           updateSubmitState();
         } catch (e) {
           statusPill.className = 'status-pill';
           statusText.textContent = 'Повтор связи…';
-          setTimeout(sendPhonePing, 2000);
+          // Бэкофф, чтобы не упереться в лимиты публичных ntfy-серверов
+          setTimeout(sendPhonePing, pingRetryDelay);
+          pingRetryDelay = Math.min(Math.round(pingRetryDelay * 1.7), 15000);
         }
       }
 
@@ -885,13 +890,20 @@
           ...workingRelays,
           ...RELAY_SERVERS.filter((r) => !workingRelays.includes(r))
         ];
+        if (ordered.length === 0) throw new Error('Нет доступных серверов передачи');
+
+        // ЗЕРКАЛИРОВАНИЕ: рассылаем фото на ВСЕ достижимые серверы параллельно.
+        // Компьютер за VPN может «не видеть» тот единственный сервер, куда ушло
+        // фото, — из-за этого раньше снимки терялись. Теперь фото придёт с любого
+        // сервера, доступного обоим устройствам. Интерфейс не ждёт самый медленный
+        // сервер: кнопка «Передано» разблокируется после первого успеха.
+        let succeeded = 0;
         let lastError = null;
 
-        // Передаём на один самый быстрый сервер (не раздваивая мобильный канал),
-        // и только при сбое мгновенно переключаемся на следующий
-        for (const srv of ordered) {
-          try {
-            const res = await fetchWithTimeout(`${srv}/${targetSessionId}`, {
+        await new Promise((resolveWhenReady) => {
+          let pending = ordered.length;
+          ordered.forEach((srv) => {
+            fetchWithTimeout(`${srv}/${targetSessionId}`, {
               method: 'PUT',
               headers: {
                 'Title': s.titleHeader,
@@ -899,19 +911,24 @@
                 'Priority': 'urgent'
               },
               body: payload
-            }, 22000);
-            if (res.ok) {
-              // Закрепляем успешный сервер первым в списке
-              workingRelays = [srv, ...workingRelays.filter((r) => r !== srv)];
-              return true;
-            }
-            lastError = new Error(`Сервер ${srv} вернул HTTP ${res.status}`);
-          } catch (e) {
-            lastError = e;
-          }
-        }
+            }, 30000)
+              .then((res) => {
+                if (!res.ok) throw new Error(`Сервер ${srv} вернул HTTP ${res.status}`);
+                succeeded++;
+                // Закрепляем успешный сервер первым в списке
+                workingRelays = [srv, ...workingRelays.filter((r) => r !== srv)];
+                if (succeeded === 1) resolveWhenReady();
+              })
+              .catch((e) => { lastError = e; })
+              .finally(() => {
+                if (--pending === 0) resolveWhenReady();
+              });
+          });
+        });
 
-        throw lastError || new Error('Нет доступных серверов передачи');
+        if (succeeded === 0) {
+          throw lastError || new Error('Ни один сервер передачи не принял файл');
+        }
       }
 
       btnSubmit.addEventListener('click', async () => {
